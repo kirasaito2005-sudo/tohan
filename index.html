@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>薬名ドリル</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@500;700;900&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!--BODY-->
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">Rx</span><span class="brand-name">薬名ドリル</span></div>
+    <nav class="nav" aria-label="画面">
+      <button type="button" class="nav-btn" data-go="home" aria-current="page">ドリル</button>
+      <button type="button" class="nav-btn" data-go="zukan">図鑑</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- ホーム -->
+  <section data-view="home">
+    <div class="hero">
+      <p class="eyebrow">登録販売者の現場知識</p>
+      <h1 class="hero-title">成分名と効能を、<br>手が覚えるまで。</h1>
+      <p class="hero-lead">OTC医薬品の有効成分・代表的な製品・漢方処方を4択で繰り返す問題集です。間違えた項目は「苦手」として記録され、あとからまとめて復習できます。</p>
+    </div>
+
+    <dl class="stats">
+      <div class="stat"><dt>収録（成分・製品・漢方）</dt><dd id="stat-items">—</dd></div>
+      <div class="stat"><dt>解いた項目</dt><dd id="stat-seen">0</dd></div>
+      <div class="stat"><dt>正答率</dt><dd id="stat-rate">—</dd></div>
+      <div class="stat"><dt>苦手</dt><dd id="stat-weak">0</dd></div>
+    </dl>
+
+    <div class="panel">
+      <div class="panel-head"><h2>出題範囲</h2><button type="button" class="link-btn" data-all="groups">すべて切り替え</button></div>
+      <div class="chips" id="groups"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>問題形式</h2><button type="button" class="link-btn" data-all="types">すべて切り替え</button></div>
+      <div id="types"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>問題数</h2></div>
+      <div class="seg" id="count" role="group" aria-label="問題数">
+        <button type="button" data-count="10">10問</button>
+        <button type="button" data-count="20">20問</button>
+        <button type="button" data-count="30">30問</button>
+        <button type="button" data-count="50">50問</button>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn btn-primary" id="start">ドリルを始める</button>
+      <button type="button" class="btn btn-ghost" id="start-weak">苦手を復習<span class="btn-n" id="weak-n">0</span></button>
+    </div>
+
+    <footer class="foot">
+      <p>成分の分類・作用・注意点は厚生労働省「登録販売者試験問題作成に関する手引き」の記載を要約しています。製品の配合成分は代表的なものを挙げており、処方改訂で変わることがあります。店頭での説明は最新の添付文書で確認してください。</p>
+      <p>学習記録はこのブラウザにだけ保存されます。<button type="button" class="link-btn" id="reset-stats">学習記録をリセット</button></p>
+    </footer>
+  </section>
+
+  <!-- 出題 -->
+  <section data-view="quiz" hidden>
+    <div class="q-top">
+      <button type="button" class="link-btn" id="q-quit">中断してホームへ</button>
+      <span class="q-progress mono" id="q-progress"></span>
+      <span class="q-score mono" id="q-score"></span>
+    </div>
+    <div class="bar"><div class="bar-fill" id="q-bar"></div></div>
+    <div class="q-card">
+      <div class="q-meta"><span class="tag tag-strong" id="q-type"></span><span class="tag" id="q-group"></span></div>
+      <p class="q-lead" id="q-lead"></p>
+      <div class="q-prompt" id="q-prompt"></div>
+    </div>
+    <div class="options" id="q-options"></div>
+    <div class="feedback" id="q-feedback" hidden></div>
+    <div class="actions"><button type="button" class="btn btn-primary" id="q-next" hidden>次の問題</button></div>
+    <p class="hint">キーボードでは 1〜4 で解答、Enter で次へ進みます。</p>
+  </section>
+
+  <!-- 結果 -->
+  <section data-view="result" hidden>
+    <div class="result-head">
+      <p class="eyebrow">結果</p>
+      <div class="r-score" id="r-score"></div>
+      <p class="r-pct" id="r-pct"></p>
+      <p class="r-msg" id="r-msg"></p>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn btn-primary" id="r-retry">間違えた問題をもう一度</button>
+      <button type="button" class="btn btn-ghost" id="r-again">新しい問題で続ける</button>
+      <button type="button" class="btn btn-ghost" id="r-home">ホームへ</button>
+    </div>
+    <ol class="r-list" id="r-list"></ol>
+  </section>
+
+  <!-- 図鑑 -->
+  <section data-view="zukan" hidden>
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab" role="tab" data-tab="ing">成分</button>
+      <button type="button" class="tab" role="tab" data-tab="prd">製品</button>
+      <button type="button" class="tab" role="tab" data-tab="kmp">漢方</button>
+    </div>
+    <div class="z-tools">
+      <input type="search" id="z-search" placeholder="成分名・製品名・作用・症状で検索" aria-label="検索">
+      <select id="z-group" aria-label="グループ"></select>
+      <label class="check"><input type="checkbox" id="z-hide"> 暗記モード（タップで表示）</label>
+      <span class="z-count mono" id="z-count"></span>
+    </div>
+    <div class="z-list" id="z-list"></div>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status" hidden></div>
+<!--/BODY-->
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
